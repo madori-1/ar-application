@@ -1431,7 +1431,8 @@
       closeSubmitModal();
       showToast(`🎉 ${name}さんのさくひんをとうこうしたよ！`);
     } catch (e) {
-      showToast('とうこうできなかった…もういちどためしてね');
+      console.error('投稿エラー:', e);
+      showToast(`❌ エラー: ${e.message}`);
     } finally {
       btn.textContent = '🚀 とうこう！';
       btn.disabled = false;
@@ -1474,7 +1475,11 @@
         body: blob
       }
     );
-    if (!uploadRes.ok) throw new Error('upload failed');
+    if (!uploadRes.ok) {
+      const errText = await uploadRes.text();
+      console.error('Storage error:', uploadRes.status, errText);
+      throw new Error(`upload failed: ${uploadRes.status} ${errText}`);
+    }
 
     // DBにレコード挿入
     const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/works`, {
@@ -1491,7 +1496,11 @@
         likes: 0
       })
     });
-    if (!insertRes.ok) throw new Error('insert failed');
+    if (!insertRes.ok) {
+      const errText = await insertRes.text();
+      console.error('DB error:', insertRes.status, errText);
+      throw new Error(`insert failed: ${insertRes.status} ${errText}`);
+    }
   }
 
   async function loadSupabaseWorks() {
