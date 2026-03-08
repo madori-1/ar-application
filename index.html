@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>マイタウンAR</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap');
+
+    :root {
+      --sky: #6EC6F5;
+      --grass: #7ED66A;
+      --sun: #FFD93D;
+      --road: #A0A0B0;
+      --ui-bg: rgba(255,255,255,0.92);
+      --ui-shadow: 0 4px 24px rgba(80,120,200,0.18);
+      --accent: #FF7043;
+      --text: #2D3A4A;
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'M PLUS Rounded 1c', 'Nunito', sans-serif;
+      background: linear-gradient(160deg, var(--sky) 0%, #b3e5fc 60%, var(--grass) 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+      color: var(--text);
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px 10px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--sun);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      box-shadow: 0 3px 12px rgba(255,180,0,0.4);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .logo-text {
+      font-size: 22px;
+      font-weight: 900;
+      color: white;
+      text-shadow: 0 2px 8px rgba(60,120,200,0.3);
+      letter-spacing: 0.5px;
+    }
+
+    .logo-text span {
+      color: var(--sun);
+    }
+
+    .header-badge {
+      background: white;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 99px;
+      box-shadow: var(--ui-shadow);
+      letter-spacing: 0.5px;
+    }
+
+    /* ===== AR VIEWPORT ===== */
+    .ar-container {
+      position: relative;
+      margin: 0 16px;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(60,100,200,0.2);
+      background: #1a2a3a;
+      aspect-ratio: 4/3;
+      max-height: 42vh;
+    }
+
+    #ar-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: linear-gradient(180deg, #1a2a4a 0%, #2d4a2d 80%, #3a5a3a 100%);
+    }
+
+    .ar-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    /* Grid animation */
+    .ar-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(110,198,245,0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(110,198,245,0.15) 1px, transparent 1px);
+      background-size: 40px 40px;
+      animation: gridPulse 4s ease-in-out infinite;
+    }
+
+    @keyframes gridPulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    .ar-scan-line {
+      position: absolute;
+      left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--sky), transparent);
+      animation: scan 2.5s ease-in-out infinite;
+      opacity: 0.7;
+    }
+
+    @keyframes scan {
+      0% { top: 0%; }
+      100% { top: 100%; }
+    }
+
+    .ar-corner {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border-color: var(--sky);
+      border-style: solid;
+      opacity: 0.8;
+    }
+    .ar-corner.tl { top: 14px; left: 14px; border-width: 3px 0 0 3px; }
+    .ar-corner.tr { top: 14px; right: 14px; border-width: 3px 3px 0 0; }
+    .ar-corner.bl { bottom: 14px; left: 14px; border-width: 0 0 3px 3px; }
+    .ar-corner.br { bottom: 14px; right: 14px; border-width: 0 3px 3px 0; }
+
+    /* Placed objects in AR view */
+    .ar-placed-objects {
+      position: absolute;
+      inset: 0;
+    }
+
+    .ar-object {
+      position: absolute;
+      font-size: 32px;
+      cursor: pointer;
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+      user-select: none;
+      transition: transform 0.15s;
+    }
+
+    .ar-object:hover { transform: scale(1.15); }
+
+    @keyframes popIn {
+      0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    .ar-status {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.55);
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 7px 18px;
+      border-radius: 99px;
+      white-space: nowrap;
+      backdrop-filter: blur(8px);
+    }
+
+    /* ===== OBJECT PALETTE ===== */
+    .palette-section {
+      margin: 16px 16px 0;
+    }
+
+    .section-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: white;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      margin-bottom: 10px;
+      padding-left: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .palette-scroll {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scrollbar-width: none;
+    }
+    .palette-scroll::-webkit-scrollbar { display: none; }
+
+    .palette-item {
+      flex-shrink: 0;
+      background: var(--ui-bg);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      box-shadow: var(--ui-shadow);
+      border: 3px solid transparent;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      min-width: 72px;
+    }
+
+    .palette-item:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 8px 28px rgba(80,120,200,0.25);
+    }
+
+    .palette-item.selected {
+      border-color: var(--accent);
+      background: #fff8f6;
+      transform: translateY(-4px) scale(1.08);
+      box-shadow: 0 8px 28px rgba(255,112,67,0.3);
+    }
+
+    .palette-item .obj-icon {
+      font-size: 32px;
+      line-height: 1;
+    }
+
+    .palette-item .obj-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text);
+      text-align: center;
+    }
+
+    /* ===== ACTION BUTTONS ===== */
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin: 14px 16px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all 0.18s;
+      box-shadow: var(--ui-shadow);
+    }
+
+    .btn:active { transform: scale(0.96); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #ff5722);
+      color: white;
+      box-shadow: 0 4px 18px rgba(255,112,67,0.4);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 6px 24px rgba(255,112,67,0.5);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: var(--ui-bg);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: white;
+      transform: translateY(-2px);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ef5350, #c62828);
+      color: white;
+      flex: 0 0 auto;
+      padding: 14px 18px;
+    }
+
+    /* ===== OBJECT COUNT BADGE ===== */
+    .count-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--ui-bg);
+      border-radius: 99px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      box-shadow: var(--ui-shadow);
+      margin: 0 16px 10px;
+    }
+
+    .count-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--grass);
+      animation: blink 1.5s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ===== INSTRUCTIONS CARD ===== */
+    .instructions {
+      margin: 0 16px 20px;
+      background: var(--ui-bg);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      box-shadow: var(--ui-shadow);
+    }
+
+    .instructions-title {
+      font-size: 13px;
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: #556;
+    }
+
+    .step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--sky);
+      color: white;
+      font-size: 11px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ===== DRAW BUTTON ===== */
+    .draw-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 16px 14px;
+      background: linear-gradient(135deg, #ab47bc, #7b1fa2);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      padding: 13px 20px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(171,71,188,0.4);
+      transition: all 0.18s;
+      width: calc(100% - 32px);
+      justify-content: center;
+    }
+    .draw-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(171,71,188,0.5); }
+    .draw-btn:active { transform: scale(0.97); }
+
+    /* ===== MODAL OVERLAY ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(20,30,50,0.75);
+      z-index: 100;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      backdrop-filter: blur(6px);
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-sheet {
+      background: white;
+      border-radius: 28px 28px 0 0;
+      width: 100%;
+      max-width: 520px;
+      padding: 20px 20px 32px;
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .modal-overlay.open .modal-sheet {
+      transform: translateY(0);
+    }
+
+    .modal-handle {
+      width: 40px;
+      height: 4px;
+      background: #ddd;
+      border-radius: 99px;
+      margin: 0 auto 18px;
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    /* ===== TABS IN MODAL ===== */
+    .modal-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .modal-tab {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid #eee;
+      border-radius: 14px;
+      background: #fafafa;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      color: #888;
+      cursor: pointer;
+      transition: all 0.18s;
+      text-align: center;
+    }
+    .modal-tab.active {
+      border-color: #ab47bc;
+      background: #f3e5f5;
+      color: #7b1fa2;
+    }
+
+    .modal-panel { display: none; }
+    .modal-panel.active { display: block; }
+
+    /* ===== DRAWING CANVAS ===== */
+    #draw-canvas {
+      border-radius: 16px;
+      border: 3px solid #e0e0e0;
+      touch-action: none;
+      display: block;
+      width: 100%;
+      cursor: crosshair;
+      background: white;
+    }
+
+    .draw-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .color-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .color-btn.active { border-color: var(--text); transform: scale(1.2); }
+    .color-btn:hover { transform: scale(1.1); }
+
+    .size-btn {
+      background: #f5f5f5;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .size-btn.active { background: #7b1fa2; color: white; border-color: #7b1fa2; }
+
+    .draw-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    /* ===== CAMERA PANEL ===== */
+    #camera-video {
+      width: 100%;
+      border-radius: 16px;
+      background: #1a2a3a;
+      display: block;
+      max-height: 200px;
+      object-fit: cover;
+    }
+
+    .camera-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    /* ===== PREVIEW PANEL ===== */
+    .preview-area {
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    #preview-canvas {
+      border-radius: 16px;
+      border: 3px dashed #ab47bc;
+      max-width: 100%;
+      background: repeating-conic-gradient(#f0f0f0 0% 25%, white 0% 50%) 0 0 / 16px 16px;
+    }
+
+    .preview-hint {
+      font-size: 12px;
+      color: #888;
+      margin-top: 8px;
+    }
+
+    /* ===== TOAST NOTIFICATION ===== */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-80px);
+      background: #2D3A4A;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 700;
+      z-index: 999;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      white-space: nowrap;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ===== THEME TABS ===== */
+    .theme-tabs {
+      display: flex;
+      gap: 8px;
+      margin: 0 16px 14px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .theme-tabs::-webkit-scrollbar { display: none; }
+
+    .theme-tab {
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.5);
+      border: none;
+      border-radius: 99px;
+      padding: 7px 16px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .theme-tab.active {
+      background: white;
+      color: var(--text);
+      box-shadow: var(--ui-shadow);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🏙️</div>
+      <div class="logo-text">マイ<span>タウン</span>AR</div>
+    </div>
+    <div class="header-badge">Phase 1</div>
+  </header>
+
+  <!-- AR VIEWPORT -->
+  <div class="ar-container" id="ar-container">
+    <canvas id="ar-canvas"></canvas>
+
+    <div class="ar-overlay">
+      <div class="ar-grid"></div>
+      <div class="ar-scan-line"></div>
+      <div class="ar-corner tl"></div>
+      <div class="ar-corner tr"></div>
+      <div class="ar-corner bl"></div>
+      <div class="ar-corner br"></div>
+      <div class="ar-placed-objects" id="placed-objects"></div>
+      <div class="ar-status" id="ar-status">📍 オブジェクトを選んでタップで配置</div>
+    </div>
+  </div>
+
+  <!-- OBJECT COUNT -->
+  <div style="margin-top:14px;">
+    <div class="count-badge">
+      <div class="count-dot"></div>
+      <span>配置ずみ：<span id="obj-count">0</span> こ</span>
+    </div>
+  </div>
+
+  <!-- DRAW BUTTON (Phase 2) -->
+  <button class="draw-btn" onclick="openDrawModal()">
+    ✏️ じぶんでかいたものをおく！
+  </button>
+
+  <!-- DRAW MODAL -->
+  <div class="modal-overlay" id="draw-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">✏️ じぶんでかこう！</div>
+
+      <div class="modal-tabs">
+        <button class="modal-tab active" onclick="switchModalTab('draw', this)">🖌️ かく</button>
+        <button class="modal-tab" onclick="switchModalTab('camera', this)">📷 しゃしん</button>
+        <button class="modal-tab" onclick="switchModalTab('preview', this)">👀 かくにん</button>
+      </div>
+
+      <!-- DRAW PANEL -->
+      <div class="modal-panel active" id="panel-draw">
+        <canvas id="draw-canvas" width="400" height="200"></canvas>
+        <div class="draw-tools">
+          <div class="color-btn active" style="background:#222" data-color="#222" onclick="setColor(this)"></div>
+          <div class="color-btn" style="background:#e53935" data-color="#e53935" onclick="setColor(this)"></div>
+          <div class="color-btn" style="background:#1e88e5" data-color="#1e88e5" onclick="setColor(this)"></div>
+          <div class="color-btn" style="background:#43a047" data-color="#43a047" onclick="setColor(this)"></div>
+          <div class="color-btn" style="background:#fb8c00" data-color="#fb8c00" onclick="setColor(this)"></div>
+          <div class="color-btn" style="background:#e91e63" data-color="#e91e63" onclick="setColor(this)"></div>
+          <div class="color-btn" style="background:#ffeb3b;border:2px solid #ddd" data-color="#ffeb3b" onclick="setColor(this)"></div>
+          <button class="size-btn active" data-size="4" onclick="setSize(this)">S</button>
+          <button class="size-btn" data-size="8" onclick="setSize(this)">M</button>
+          <button class="size-btn" data-size="16" onclick="setSize(this)">L</button>
+          <div class="color-btn" style="background:white;border:2px solid #ddd;font-size:14px;display:flex;align-items:center;justify-content:center;" data-color="eraser" onclick="setColor(this)">🧹</div>
+        </div>
+        <div class="draw-actions">
+          <button class="btn btn-secondary" style="font-size:12px;padding:10px" onclick="clearDrawCanvas()">🗑️ けす</button>
+          <button class="btn btn-primary" style="font-size:12px;padding:10px" onclick="processDrawing()">✨ かんせい！</button>
+        </div>
+      </div>
+
+      <!-- CAMERA PANEL -->
+      <div class="modal-panel" id="panel-camera">
+        <video id="camera-video" autoplay playsinline muted></video>
+        <canvas id="camera-canvas" style="display:none"></canvas>
+        <div class="camera-actions">
+          <button class="btn btn-secondary" style="font-size:12px;padding:10px" onclick="startCamera()" id="camera-start-btn">📷 カメラをひらく</button>
+          <button class="btn btn-primary" style="font-size:12px;padding:10px" onclick="capturePhoto()" id="camera-capture-btn" disabled>🔴 とる</button>
+        </div>
+        <p style="font-size:11px;color:#888;margin-top:8px;text-align:center">かいた絵をさつえいして3Dオブジェクトにしよう！</p>
+      </div>
+
+      <!-- PREVIEW PANEL -->
+      <div class="modal-panel" id="panel-preview">
+        <div class="preview-area">
+          <canvas id="preview-canvas" width="200" height="200"></canvas>
+          <p class="preview-hint" id="preview-hint">まだなにもないよ。かくかしゃしんをとってね！</p>
+        </div>
+        <div class="draw-actions">
+          <button class="btn btn-secondary" style="font-size:12px;padding:10px" onclick="closeDrawModal()">もどる</button>
+          <button class="btn btn-primary" style="font-size:12px;padding:10px" onclick="addCustomToAR()" id="add-to-ar-btn" disabled>🏙️ ARにおく！</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- THEME TABS -->
+  <div class="theme-tabs">
+    <button class="theme-tab active" onclick="setTheme('town', this)">🏘️ まち</button>
+    <button class="theme-tab" onclick="setTheme('nature', this)">🌿 しぜん</button>
+    <button class="theme-tab" onclick="setTheme('space', this)">🚀 うちゅう</button>
+  </div>
+
+  <!-- PALETTE -->
+  <div class="palette-section">
+    <div class="section-label">🎨 おくもの</div>
+    <div class="palette-scroll" id="palette"></div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions">
+    <button class="btn btn-primary" onclick="takeScreenshot()">
+      📸 さつえい
+    </button>
+    <button class="btn btn-secondary" onclick="toggleMode()">
+      🔄 <span id="mode-label">どかす</span>
+    </button>
+    <button class="btn btn-danger" onclick="clearAll()">
+      🗑️
+    </button>
+  </div>
+
+  <!-- INSTRUCTIONS -->
+  <div class="instructions">
+    <div class="instructions-title">📖 あそびかた</div>
+    <div class="step-list">
+      <div class="step">
+        <div class="step-num">1</div>
+        <span>テーマをえらぼう（まち・しぜん・うちゅう）</span>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <span>おきたいものをタップしてえらぼう</span>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <span>ARがめんをタップしておこう！</span>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <span>さつえいしてせんせいにみせよう 📸</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+<script>
+  // ========================================
+  // DATA
+  // ========================================
+  const themes = {
+    town: [
+      { icon: '🏠', label: 'いえ' },
+      { icon: '🏢', label: 'ビル' },
+      { icon: '🏫', label: 'がっこう' },
+      { icon: '🏪', label: 'おみせ' },
+      { icon: '🚗', label: 'くるま' },
+      { icon: '🚌', label: 'バス' },
+      { icon: '🌳', label: 'き' },
+      { icon: '🌸', label: 'はな' },
+      { icon: '⛲', label: 'ふんすい' },
+      { icon: '🛣️', label: 'みち' },
+      { icon: '🏦', label: 'ぎんこう' },
+      { icon: '🚦', label: 'しんごう' },
+    ],
+    nature: [
+      { icon: '🌲', label: 'もみの木' },
+      { icon: '🌋', label: 'かざん' },
+      { icon: '🏔️', label: 'やま' },
+      { icon: '🌊', label: 'うみ' },
+      { icon: '🦁', label: 'ライオン' },
+      { icon: '🐘', label: 'ぞう' },
+      { icon: '🦒', label: 'きりん' },
+      { icon: '🌻', label: 'ひまわり' },
+      { icon: '🍄', label: 'きのこ' },
+      { icon: '🌈', label: 'にじ' },
+      { icon: '☀️', label: 'たいよう' },
+      { icon: '🌙', label: 'つき' },
+    ],
+    space: [
+      { icon: '🚀', label: 'ロケット' },
+      { icon: '🛸', label: 'UFO' },
+      { icon: '🪐', label: 'わくせい' },
+      { icon: '⭐', label: 'ほし' },
+      { icon: '🌙', label: 'つき' },
+      { icon: '👽', label: 'うちゅうじん' },
+      { icon: '🤖', label: 'ロボット' },
+      { icon: '🔭', label: 'ぼうえんきょう' },
+      { icon: '💫', label: 'りゅうせい' },
+      { icon: '🌌', label: 'ぎんが' },
+      { icon: '🛰️', label: 'えいせい' },
+      { icon: '☄️', label: 'すいせい' },
+    ],
+  };
+
+  // ========================================
+  // STATE
+  // ========================================
+  let selectedItem = null;
+  let placedObjects = [];
+  let removeMode = false;
+  let currentTheme = 'town';
+  let objectIdCounter = 0;
+
+  // ========================================
+  // PALETTE RENDER
+  // ========================================
+  function renderPalette(theme) {
+    const palette = document.getElementById('palette');
+    palette.innerHTML = '';
+    themes[theme].forEach((item, i) => {
+      const el = document.createElement('div');
+      el.className = 'palette-item';
+      el.innerHTML = `<div class="obj-icon">${item.icon}</div><div class="obj-label">${item.label}</div>`;
+      el.addEventListener('click', () => selectItem(item, el));
+      palette.appendChild(el);
+    });
+    selectedItem = null;
+  }
+
+  function selectItem(item, el) {
+    selectedItem = item;
+    document.querySelectorAll('.palette-item').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+    updateStatus(`${item.icon} ${item.label} をえらんだ！ARがめんをタップしておこう`);
+  }
+
+  // ========================================
+  // THEME
+  // ========================================
+  function setTheme(theme, btn) {
+    currentTheme = theme;
+    document.querySelectorAll('.theme-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    renderPalette(theme);
+    selectedItem = null;
+    showToast(`${btn.textContent} テーマにかえたよ！`);
+  }
+
+  // ========================================
+  // AR CANVAS CLICK → PLACE OBJECT
+  // ========================================
+  const arContainer = document.getElementById('ar-container');
+  arContainer.addEventListener('click', (e) => {
+    if (e.target.classList.contains('ar-object')) return;
+
+    if (removeMode) {
+      showToast('どかしたいオブジェクトをタップしてね');
+      return;
+    }
+
+    if (!selectedItem) {
+      showToast('まずおきたいものをえらんでね！');
+      return;
+    }
+
+    const rect = arContainer.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    placeObject(selectedItem, x, y);
+  });
+
+  function placeObject(item, xPct, yPct) {
+    const id = ++objectIdCounter;
+    const container = document.getElementById('placed-objects');
+
+    const el = document.createElement('div');
+    el.className = 'ar-object';
+    el.textContent = item.icon;
+    el.dataset.id = id;
+    el.style.left = `${xPct}%`;
+    el.style.top = `${yPct}%`;
+    el.style.transform = 'translate(-50%, -50%)';
+    el.title = item.label;
+
+    el.addEventListener('click', (e) => {
+      if (removeMode) {
+        el.style.transition = 'transform 0.2s, opacity 0.2s';
+        el.style.transform = 'translate(-50%,-50%) scale(0)';
+        el.style.opacity = '0';
+        setTimeout(() => {
+          el.remove();
+          placedObjects = placedObjects.filter(o => o.id !== id);
+          updateCount();
+          showToast(`${item.icon} どかしたよ！`);
+        }, 200);
+        e.stopPropagation();
+      }
+    });
+
+    container.appendChild(el);
+    placedObjects.push({ id, item, x: xPct, y: yPct });
+    updateCount();
+    updateStatus(`${item.icon} ${item.label} をおいたよ！`);
+  }
+
+  // ========================================
+  // UTILS
+  // ========================================
+  function updateCount() {
+    document.getElementById('obj-count').textContent = placedObjects.length;
+  }
+
+  function updateStatus(msg) {
+    document.getElementById('ar-status').textContent = msg;
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  function toggleMode() {
+    removeMode = !removeMode;
+    const label = document.getElementById('mode-label');
+    const btn = label.closest('.btn');
+    if (removeMode) {
+      label.textContent = 'おく';
+      btn.style.background = 'linear-gradient(135deg,#ef5350,#c62828)';
+      btn.style.color = 'white';
+      updateStatus('❌ どかしたいオブジェクトをタップしよう');
+      showToast('どかすモードにしたよ');
+    } else {
+      label.textContent = 'どかす';
+      btn.style.background = '';
+      btn.style.color = '';
+      updateStatus('📍 オブジェクトを選んでタップで配置');
+      showToast('おくモードにもどったよ');
+    }
+  }
+
+  function clearAll() {
+    if (placedObjects.length === 0) {
+      showToast('まだなにもおいていないよ！');
+      return;
+    }
+    document.getElementById('placed-objects').innerHTML = '';
+    placedObjects = [];
+    updateCount();
+    showToast('ぜんぶきれいにしたよ！');
+    updateStatus('📍 オブジェクトを選んでタップで配置');
+  }
+
+  function takeScreenshot() {
+    if (placedObjects.length === 0) {
+      showToast('なにかおいてからさつえいしよう！');
+      return;
+    }
+    showToast('📸 さつえいしたよ！（Phase 3で保存できるよ）');
+  }
+
+  // ========================================
+  // INIT
+  // ========================================
+  renderPalette('town');
+</script>
+</body>
+</html>
