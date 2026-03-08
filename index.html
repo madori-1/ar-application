@@ -385,6 +385,242 @@
       flex-shrink: 0;
     }
 
+    /* ===== GALLERY BUTTON ===== */
+    .gallery-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 16px 10px;
+      background: linear-gradient(135deg, #26a69a, #00695c);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      padding: 13px 20px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(38,166,154,0.4);
+      transition: all 0.18s;
+      width: calc(100% - 32px);
+      justify-content: center;
+    }
+    .gallery-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(38,166,154,0.5); }
+    .gallery-btn:active { transform: scale(0.97); }
+
+    /* ===== SUBMIT MODAL ===== */
+    .submit-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(20,30,50,0.75);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      backdrop-filter: blur(6px);
+      padding: 20px;
+    }
+    .submit-modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .submit-modal {
+      background: white;
+      border-radius: 28px;
+      width: 100%;
+      max-width: 400px;
+      padding: 28px 24px;
+      transform: scale(0.9);
+      transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .submit-modal-overlay.open .submit-modal { transform: scale(1); }
+
+    .submit-modal-title {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--text);
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .submit-modal-sub {
+      font-size: 12px;
+      color: #888;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .screenshot-preview-wrap {
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      border: 3px solid #e0e0e0;
+      background: #f5f5f5;
+      aspect-ratio: 4/3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #submit-preview-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .name-input-wrap {
+      margin-bottom: 14px;
+    }
+    .name-input-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+      display: block;
+    }
+    #author-name-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 14px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #author-name-input:focus { border-color: #26a69a; }
+
+    /* ===== GALLERY MODAL ===== */
+    .gallery-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10,20,40,0.85);
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      backdrop-filter: blur(8px);
+    }
+    .gallery-modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .gallery-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px 14px;
+      flex-shrink: 0;
+    }
+    .gallery-title {
+      font-size: 18px;
+      font-weight: 900;
+      color: white;
+    }
+    .gallery-close-btn {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.18s;
+    }
+    .gallery-close-btn:hover { background: rgba(255,255,255,0.25); }
+
+    .gallery-count {
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+      padding: 0 20px 12px;
+      flex-shrink: 0;
+    }
+
+    .gallery-grid {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 16px 24px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      align-content: start;
+    }
+
+    .gallery-card {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      animation: cardIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    }
+
+    @keyframes cardIn {
+      0% { transform: scale(0.8) translateY(20px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .gallery-card-img {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      display: block;
+      background: #f0f0f0;
+    }
+
+    .gallery-card-footer {
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .gallery-card-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .gallery-card-like {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      color: #aaa;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      transition: transform 0.2s;
+      padding: 4px;
+      border-radius: 8px;
+    }
+    .gallery-card-like:hover { transform: scale(1.2); }
+    .gallery-card-like.liked { color: #e53935; }
+
+    .gallery-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 40px 20px;
+      color: rgba(255,255,255,0.5);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .gallery-loading {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 40px;
+      color: rgba(255,255,255,0.6);
+      font-size: 24px;
+    }
+
     /* ===== DRAW BUTTON ===== */
     .draw-btn {
       display: flex;
@@ -631,7 +867,7 @@
       <div class="logo-icon">🏙️</div>
       <div class="logo-text">マイ<span>タウン</span>AR</div>
     </div>
-    <div class="header-badge">Phase 1</div>
+    <div class="header-badge">Phase 3</div>
   </header>
 
   <!-- AR VIEWPORT -->
@@ -655,6 +891,44 @@
     <div class="count-badge">
       <div class="count-dot"></div>
       <span>配置ずみ：<span id="obj-count">0</span> こ</span>
+    </div>
+  </div>
+
+  <!-- GALLERY BUTTON (Phase 3) -->
+  <button class="gallery-btn" onclick="openGallery()">
+    🖼️ クラスのさくひんをみる
+  </button>
+
+  <!-- SUBMIT MODAL -->
+  <div class="submit-modal-overlay" id="submit-modal">
+    <div class="submit-modal">
+      <div class="submit-modal-title">📸 さくひんをとうこう！</div>
+      <div class="submit-modal-sub">クラスのみんなにみせよう</div>
+      <div class="screenshot-preview-wrap">
+        <img id="submit-preview-img" src="" alt="プレビュー" />
+      </div>
+      <div class="name-input-wrap">
+        <label class="name-input-label">👤 なまえをいれてね</label>
+        <input id="author-name-input" type="text" placeholder="例：たろう" maxlength="10" />
+      </div>
+      <div class="draw-actions">
+        <button class="btn btn-secondary" style="font-size:13px;padding:12px" onclick="closeSubmitModal()">やめる</button>
+        <button class="btn btn-primary" style="font-size:13px;padding:12px" onclick="submitWork()" id="submit-btn">
+          🚀 とうこう！
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GALLERY MODAL -->
+  <div class="gallery-modal-overlay" id="gallery-modal">
+    <div class="gallery-header">
+      <div class="gallery-title">🖼️ クラスのさくひん</div>
+      <button class="gallery-close-btn" onclick="closeGallery()">✕</button>
+    </div>
+    <div class="gallery-count" id="gallery-count">よみこみちゅう…</div>
+    <div class="gallery-grid" id="gallery-grid">
+      <div class="gallery-loading">⏳</div>
     </div>
   </div>
 
@@ -766,8 +1040,12 @@
         <span>ARがめんをタップしておこう！</span>
       </div>
       <div class="step">
-        <div class="step-num">4</div>
-        <span>さつえいしてせんせいにみせよう 📸</span>
+        <div class="step-num">✏️</div>
+        <span>「じぶんでかく」ボタンでえをかいてARにおける！</span>
+      </div>
+      <div class="step">
+        <div class="step-num">🖼️</div>
+        <span>さつえいしてなまえをいれたらクラスにとうこう！</span>
       </div>
     </div>
   </div>
@@ -980,7 +1258,543 @@
       showToast('なにかおいてからさつえいしよう！');
       return;
     }
-    showToast('📸 さつえいしたよ！（Phase 3で保存できるよ）');
+    captureARView((dataUrl) => {
+      openSubmitModal(dataUrl);
+    });
+  }
+
+  // ========================================
+  // PHASE 3 - GALLERY
+  // ========================================
+
+  // --- Supabase設定（本番時はここを書き換える）---
+  const SUPABASE_URL = '';       // 例: 'https://xxxx.supabase.co'
+  const SUPABASE_ANON_KEY = '';  // 例: 'eyJhbGci...'
+  const USE_DEMO_MODE = !SUPABASE_URL || !SUPABASE_ANON_KEY;
+
+  // デモ用インメモリストレージ
+  let demoWorks = [];
+  let demoLikes = {};
+
+  // ===== AR VIEW CAPTURE =====
+  function captureARView(callback) {
+    const container = document.getElementById('ar-container');
+    // html2canvas的な方法の代わりに、ARコンテナをSVGで再現してキャプチャ
+    const canvas = document.createElement('canvas');
+    const rect = container.getBoundingClientRect();
+    canvas.width = rect.width * 2;
+    canvas.height = rect.height * 2;
+    const ctx = canvas.getContext('2d');
+
+    // 背景グラデーション描画
+    const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    bg.addColorStop(0, '#1a2a4a');
+    bg.addColorStop(0.8, '#2d4a2d');
+    bg.addColorStop(1, '#3a5a3a');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // グリッド描画
+    ctx.strokeStyle = 'rgba(110,198,245,0.2)';
+    ctx.lineWidth = 1;
+    const gridSize = 40 * 2;
+    for (let x = 0; x < canvas.width; x += gridSize) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    }
+    for (let y = 0; y < canvas.height; y += gridSize) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+    }
+
+    // 配置オブジェクトを描画
+    const drawPromises = placedObjects.map(obj => new Promise(resolve => {
+      const x = (obj.x / 100) * canvas.width;
+      const y = (obj.y / 100) * canvas.height;
+
+      if (obj.customDataUrl) {
+        const img = new Image();
+        img.onload = () => {
+          ctx.drawImage(img, x - 60, y - 60, 120, 120);
+          resolve();
+        };
+        img.onerror = resolve;
+        img.src = obj.customDataUrl;
+      } else {
+        ctx.font = `${64}px serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(obj.item.icon, x, y);
+        resolve();
+      }
+    }));
+
+    Promise.all(drawPromises).then(() => {
+      callback(canvas.toDataURL('image/jpeg', 0.85));
+    });
+  }
+
+  // ===== SUBMIT MODAL =====
+  function openSubmitModal(dataUrl) {
+    document.getElementById('submit-preview-img').src = dataUrl;
+    document.getElementById('submit-modal').dataset.dataUrl = dataUrl;
+    document.getElementById('submit-modal').classList.add('open');
+    document.getElementById('author-name-input').focus();
+  }
+
+  function closeSubmitModal() {
+    document.getElementById('submit-modal').classList.remove('open');
+  }
+
+  async function submitWork() {
+    const name = document.getElementById('author-name-input').value.trim();
+    if (!name) {
+      document.getElementById('author-name-input').style.borderColor = '#e53935';
+      setTimeout(() => document.getElementById('author-name-input').style.borderColor = '', 1200);
+      showToast('なまえをいれてね！');
+      return;
+    }
+
+    const dataUrl = document.getElementById('submit-modal').dataset.dataUrl;
+    const btn = document.getElementById('submit-btn');
+    btn.textContent = '⏳ とうこうちゅう…';
+    btn.disabled = true;
+
+    try {
+      if (USE_DEMO_MODE) {
+        await submitDemoWork(name, dataUrl);
+      } else {
+        await submitSupabaseWork(name, dataUrl);
+      }
+      closeSubmitModal();
+      showToast(`🎉 ${name}さんのさくひんをとうこうしたよ！`);
+      document.getElementById('author-name-input').value = '';
+    } catch (e) {
+      showToast('とうこうできなかった…もういちどためしてね');
+    } finally {
+      btn.textContent = '🚀 とうこう！';
+      btn.disabled = false;
+    }
+  }
+
+  // ===== DEMO MODE =====
+  async function submitDemoWork(name, dataUrl) {
+    await new Promise(r => setTimeout(r, 600)); // simulate network
+    demoWorks.unshift({
+      id: Date.now(),
+      author_name: name,
+      screenshot_url: dataUrl,
+      likes: 0,
+      created_at: new Date().toISOString()
+    });
+  }
+
+  async function loadDemoWorks() {
+    await new Promise(r => setTimeout(r, 400));
+    return demoWorks;
+  }
+
+  // ===== SUPABASE MODE =====
+  async function submitSupabaseWork(name, dataUrl) {
+    // Base64をBlobに変換
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    const fileName = `${Date.now()}_${name}.jpg`;
+
+    // Storageにアップロード
+    const uploadRes = await fetch(
+      `${SUPABASE_URL}/storage/v1/object/screenshots/${fileName}`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'image/jpeg',
+        },
+        body: blob
+      }
+    );
+    if (!uploadRes.ok) throw new Error('upload failed');
+
+    // DBにレコード挿入
+    const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/works`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'apikey': SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        author_name: name,
+        screenshot_url: fileName,
+        likes: 0
+      })
+    });
+    if (!insertRes.ok) throw new Error('insert failed');
+  }
+
+  async function loadSupabaseWorks() {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/works?select=*&order=created_at.desc`,
+      {
+        headers: {
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'apikey': SUPABASE_ANON_KEY,
+        }
+      }
+    );
+    if (!res.ok) throw new Error('load failed');
+    const works = await res.json();
+    // 公開URLに変換
+    return works.map(w => ({
+      ...w,
+      screenshot_url: w.screenshot_url.startsWith('data:')
+        ? w.screenshot_url
+        : `${SUPABASE_URL}/storage/v1/object/public/screenshots/${w.screenshot_url}`
+    }));
+  }
+
+  // ===== GALLERY MODAL =====
+  async function openGallery() {
+    document.getElementById('gallery-modal').classList.add('open');
+    await loadGallery();
+  }
+
+  function closeGallery() {
+    document.getElementById('gallery-modal').classList.remove('open');
+  }
+
+  async function loadGallery() {
+    const grid = document.getElementById('gallery-grid');
+    const countEl = document.getElementById('gallery-count');
+    grid.innerHTML = '<div class="gallery-loading">⏳</div>';
+
+    try {
+      const works = USE_DEMO_MODE
+        ? await loadDemoWorks()
+        : await loadSupabaseWorks();
+
+      grid.innerHTML = '';
+      countEl.textContent = USE_DEMO_MODE
+        ? `${works.length} けん（デモモード）`
+        : `${works.length} けんのさくひん`;
+
+      if (works.length === 0) {
+        grid.innerHTML = '<div class="gallery-empty">まださくひんがないよ。<br>さいしょのひとになろう！🌟</div>';
+        return;
+      }
+
+      works.forEach((work, i) => {
+        const card = createGalleryCard(work, i);
+        grid.appendChild(card);
+      });
+    } catch (e) {
+      grid.innerHTML = '<div class="gallery-empty">よみこめなかった…😢</div>';
+    }
+  }
+
+  function createGalleryCard(work, index) {
+    const card = document.createElement('div');
+    card.className = 'gallery-card';
+    card.style.animationDelay = `${index * 0.06}s`;
+
+    const likeKey = `like_${work.id}`;
+    const isLiked = !!demoLikes[likeKey];
+    const likeCount = (work.likes || 0) + (isLiked ? 1 : 0);
+
+    card.innerHTML = `
+      <img class="gallery-card-img" src="${work.screenshot_url}" alt="${work.author_name}のさくひん"
+           onerror="this.style.background='#e0e0e0';this.style.padding='20px'" />
+      <div class="gallery-card-footer">
+        <div class="gallery-card-name">👤 ${work.author_name}</div>
+        <button class="gallery-card-like ${isLiked ? 'liked' : ''}"
+                onclick="toggleLike(this, '${work.id}', ${work.likes || 0})">
+          ${isLiked ? '❤️' : '🤍'} ${likeCount}
+        </button>
+      </div>
+    `;
+    return card;
+  }
+
+  function toggleLike(btn, workId, baseLikes) {
+    const likeKey = `like_${workId}`;
+    demoLikes[likeKey] = !demoLikes[likeKey];
+    const isLiked = demoLikes[likeKey];
+    const count = baseLikes + (isLiked ? 1 : 0);
+    btn.innerHTML = `${isLiked ? '❤️' : '🤍'} ${count}`;
+    btn.classList.toggle('liked', isLiked);
+    btn.style.transform = 'scale(1.4)';
+    setTimeout(() => btn.style.transform = '', 200);
+  }
+
+  // ========================================
+  // PHASE 2 - DRAW MODAL
+  // ========================================
+  let drawCtx, drawCanvas;
+  let isDrawing = false;
+  let currentColor = '#222';
+  let currentSize = 4;
+  let isEraser = false;
+  let cameraStream = null;
+  let processedImageDataUrl = null;
+
+  function openDrawModal() {
+    document.getElementById('draw-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    initDrawCanvas();
+  }
+
+  function closeDrawModal() {
+    document.getElementById('draw-modal').classList.remove('open');
+    document.body.style.overflow = '';
+    stopCamera();
+  }
+
+  // Close on backdrop click
+  document.getElementById('draw-modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('draw-modal')) closeDrawModal();
+  });
+
+  function switchModalTab(tab, btn) {
+    document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.modal-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`panel-${tab}`).classList.add('active');
+    if (tab === 'preview') updatePreview();
+  }
+
+  // ===== DRAWING CANVAS =====
+  function initDrawCanvas() {
+    drawCanvas = document.getElementById('draw-canvas');
+    drawCtx = drawCanvas.getContext('2d');
+    drawCtx.fillStyle = 'white';
+    drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+    drawCtx.lineCap = 'round';
+    drawCtx.lineJoin = 'round';
+
+    // Mouse events
+    drawCanvas.addEventListener('mousedown', startDraw);
+    drawCanvas.addEventListener('mousemove', draw);
+    drawCanvas.addEventListener('mouseup', endDraw);
+    drawCanvas.addEventListener('mouseleave', endDraw);
+
+    // Touch events
+    drawCanvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e.touches[0]); }, { passive: false });
+    drawCanvas.addEventListener('touchmove', e => { e.preventDefault(); draw(e.touches[0]); }, { passive: false });
+    drawCanvas.addEventListener('touchend', endDraw);
+  }
+
+  function getCanvasPos(e) {
+    const rect = drawCanvas.getBoundingClientRect();
+    const scaleX = drawCanvas.width / rect.width;
+    const scaleY = drawCanvas.height / rect.height;
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY
+    };
+  }
+
+  function startDraw(e) {
+    isDrawing = true;
+    const pos = getCanvasPos(e);
+    drawCtx.beginPath();
+    drawCtx.moveTo(pos.x, pos.y);
+  }
+
+  function draw(e) {
+    if (!isDrawing) return;
+    const pos = getCanvasPos(e);
+    drawCtx.lineWidth = isEraser ? currentSize * 4 : currentSize;
+    drawCtx.strokeStyle = isEraser ? 'white' : currentColor;
+    drawCtx.lineTo(pos.x, pos.y);
+    drawCtx.stroke();
+  }
+
+  function endDraw() { isDrawing = false; }
+
+  function setColor(el) {
+    document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    if (el.dataset.color === 'eraser') {
+      isEraser = true;
+    } else {
+      isEraser = false;
+      currentColor = el.dataset.color;
+    }
+  }
+
+  function setSize(el) {
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    currentSize = parseInt(el.dataset.size);
+  }
+
+  function clearDrawCanvas() {
+    drawCtx.fillStyle = 'white';
+    drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+    showToast('きれいにしたよ！');
+  }
+
+  // ===== PROCESS DRAWING → TRANSPARENT PNG =====
+  function processDrawing() {
+    const sourceCanvas = document.getElementById('draw-canvas');
+    removeWhiteBackground(sourceCanvas, (resultDataUrl) => {
+      processedImageDataUrl = resultDataUrl;
+      showToast('✨ できたよ！かくにんタブでみてね');
+      // Auto switch to preview
+      const tabs = document.querySelectorAll('.modal-tab');
+      switchModalTab('preview', tabs[2]);
+    });
+  }
+
+  function removeWhiteBackground(sourceCanvas, callback) {
+    const offscreen = document.createElement('canvas');
+    offscreen.width = sourceCanvas.width;
+    offscreen.height = sourceCanvas.height;
+    const ctx = offscreen.getContext('2d');
+    ctx.drawImage(sourceCanvas, 0, 0);
+
+    const imageData = ctx.getImageData(0, 0, offscreen.width, offscreen.height);
+    const data = imageData.data;
+    const threshold = 230;
+
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i+1], b = data[i+2];
+      if (r > threshold && g > threshold && b > threshold) {
+        data[i+3] = 0; // transparent
+      }
+    }
+    ctx.putImageData(imageData, 0, 0);
+    callback(offscreen.toDataURL('image/png'));
+  }
+
+  // ===== CAMERA =====
+  async function startCamera() {
+    try {
+      cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
+      });
+      const video = document.getElementById('camera-video');
+      video.srcObject = cameraStream;
+      document.getElementById('camera-start-btn').textContent = '✅ カメラON';
+      document.getElementById('camera-capture-btn').disabled = false;
+      showToast('カメラがひらいたよ！');
+    } catch (err) {
+      showToast('カメラがつかえないよ。かわりにかいてね');
+    }
+  }
+
+  function capturePhoto() {
+    const video = document.getElementById('camera-video');
+    const canvas = document.getElementById('camera-canvas');
+    canvas.width = video.videoWidth || 400;
+    canvas.height = video.videoHeight || 300;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
+
+    removeWhiteBackground(canvas, (resultDataUrl) => {
+      processedImageDataUrl = resultDataUrl;
+      stopCamera();
+      showToast('📷 とれたよ！かくにんタブでみてね');
+      const tabs = document.querySelectorAll('.modal-tab');
+      switchModalTab('preview', tabs[2]);
+    });
+  }
+
+  function stopCamera() {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(t => t.stop());
+      cameraStream = null;
+    }
+    document.getElementById('camera-start-btn').textContent = '📷 カメラをひらく';
+    document.getElementById('camera-capture-btn').disabled = true;
+  }
+
+  // ===== PREVIEW =====
+  function updatePreview() {
+    const previewCanvas = document.getElementById('preview-canvas');
+    const hint = document.getElementById('preview-hint');
+    const addBtn = document.getElementById('add-to-ar-btn');
+
+    if (!processedImageDataUrl) {
+      hint.textContent = 'まだなにもないよ。かくかしゃしんをとってね！';
+      addBtn.disabled = true;
+      return;
+    }
+
+    const ctx = previewCanvas.getContext('2d');
+    ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+    const img = new Image();
+    img.onload = () => {
+      // Fit into preview canvas
+      const scale = Math.min(
+        previewCanvas.width / img.width,
+        previewCanvas.height / img.height
+      );
+      const w = img.width * scale;
+      const h = img.height * scale;
+      const x = (previewCanvas.width - w) / 2;
+      const y = (previewCanvas.height - h) / 2;
+      ctx.drawImage(img, x, y, w, h);
+    };
+    img.src = processedImageDataUrl;
+    hint.textContent = 'はくけい（白）をとうめいにしたよ！';
+    addBtn.disabled = false;
+  }
+
+  // ===== ADD CUSTOM OBJECT TO AR =====
+  function addCustomToAR() {
+    if (!processedImageDataUrl) return;
+
+    // Place at center of AR view
+    const x = 35 + Math.random() * 30;
+    const y = 25 + Math.random() * 40;
+    placeCustomObject(processedImageDataUrl, x, y);
+    closeDrawModal();
+    showToast('🎉 じぶんのえをARにおいたよ！');
+    processedImageDataUrl = null;
+  }
+
+  function placeCustomObject(dataUrl, xPct, yPct) {
+    const id = ++objectIdCounter;
+    const container = document.getElementById('placed-objects');
+
+    const el = document.createElement('div');
+    el.className = 'ar-object';
+    el.dataset.id = id;
+    el.style.left = `${xPct}%`;
+    el.style.top = `${yPct}%`;
+    el.style.transform = 'translate(-50%, -50%)';
+    el.style.fontSize = '0';
+
+    const img = document.createElement('img');
+    img.src = dataUrl;
+    img.style.cssText = `
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+      display: block;
+    `;
+    el.appendChild(img);
+
+    el.addEventListener('click', (e) => {
+      if (removeMode) {
+        el.style.transition = 'transform 0.2s, opacity 0.2s';
+        el.style.transform = 'translate(-50%,-50%) scale(0)';
+        el.style.opacity = '0';
+        setTimeout(() => {
+          el.remove();
+          placedObjects = placedObjects.filter(o => o.id !== id);
+          updateCount();
+          showToast('どかしたよ！');
+        }, 200);
+        e.stopPropagation();
+      }
+    });
+
+    container.appendChild(el);
+    placedObjects.push({ id, item: { icon: '🎨', label: 'マイえ' }, x: xPct, y: yPct, customDataUrl: dataUrl });
+    updateCount();
+    updateStatus('🎨 じぶんのえをおいたよ！');
   }
 
   // ========================================
